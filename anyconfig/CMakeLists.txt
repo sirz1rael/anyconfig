@@ -1,5 +1,7 @@
 set(LIB_SOURCES 
     src/anyconfig.cpp
+    src/parser.cpp
+    src/config.cpp
 )
 
 add_library(anyconfig ${LIB_SOURCES})
@@ -9,12 +11,11 @@ target_include_directories(anyconfig
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>
     PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/src
-        # ${CMAKE_CURRENT_SOURCE_DIR}/include/anyconfig/detail
+        ${CMAKE_CURRENT_SOURCE_DIR}/${LIB_SOURCES}
 )
 
 target_compile_features(anyconfig PUBLIC cxx_std_20)
-target_compile_options(anyconfig PRIVATE -Wall -Wextra -Wpedantic)
+target_compile_options(anyconfig PRIVATE -Wall -Wextra -Wpedantic -Werror)
 
 add_library(anyconfig_interface INTERFACE)
 target_link_libraries(anyconfig_interface INTERFACE anyconfig)

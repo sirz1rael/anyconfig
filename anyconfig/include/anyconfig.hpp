@@ -1,36 +1,42 @@
 #ifndef ANYCONFIG_HPP
 #define ANYCONFIG_HPP
 
-
 #include <iostream>
 #include <string_view>
+#include "parser.hpp"
+#include "config.hpp"
+#include "types_decl.hpp"
 
 namespace anyconfig {
-    enum class ConfigFileType {
-        YAML, JSON, INI, TOML, ENV, SERVER
-    };
+    
+    std::string_view TypeToString(const types::ConfigFileType& type);
 
-    std::string_view typeToString(const ConfigFileType& type);
-
-    template<ConfigFileType type>
+    template<types::ConfigFileType T>  // Note: using T as template parameter
     class AnyConfig {
     private:
-        ConfigFileType _config_file_type;
+        // You can store the type if needed, but template parameter T is compile-time
+        static constexpr types::ConfigFileType _configFileType = T;
+        
         AnyConfig() {
-            _config_file_type = type;
-            std::cout << "Config Type: " << typeToString(_config_file_type) << '\n';
+            std::cout << "Config Type: " << TypeToString(T) << '\n';
         }
         
     public:
         AnyConfig(AnyConfig const&) = delete;
         void operator=(AnyConfig const&) = delete;
 
-        static AnyConfig& getInstance() {
+        static AnyConfig& GetInstance() {
             static AnyConfig instance;
             return instance;
         }
-        void parse() {
-            std::cout << "Parsing " << typeToString(type) << " config" << std::endl;
+        
+        config::Config Parse() {
+            auto parserFactory = parsing::CreateParser(T);
+            if (!parserFactory) {
+                throw std::runtime_error("Parser factory returned null");
+            }
+            auto config = parserFactory->parse();
+            return config;
         }
     };
 }
